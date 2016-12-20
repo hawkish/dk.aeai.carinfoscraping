@@ -4,7 +4,8 @@
   :description "Describe carinfoscraping here"
   :author "Your Name <your.name@example.com>"
   :license "Specify license here"
-  :depends-on (#:drakma)
+  :depends-on (#:drakma
+               #:yason)
   :serial t
   :components ((:file "package")
                (:file "carinfoscraping")))
