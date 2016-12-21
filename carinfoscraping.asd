@@ -5,7 +5,8 @@
   :author "Your Name <your.name@example.com>"
   :license "Specify license here"
   :depends-on (#:drakma
-               #:yason)
+               #:yason
+               #:cl-json)
   :serial t
   :components ((:file "package")
                (:file "carinfoscraping")))
