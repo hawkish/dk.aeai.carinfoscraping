@@ -18,10 +18,9 @@
                          :method :get
                          :external-format-out :utf-8
                          :external-format-in :utf-8
-                         :redirect 100
-                         :parameters '(("a" . "b")))
+                         :redirect 100)
       (cond ((not (equalp status-code 200)) (error request-result))
-            ((not (string= (cdr (assoc ':content-type headers)) "application/json; charset=UTF-8"))) 
+            ((not (string= (cdr (assoc ':content-type headers)) "application/json; charset=UTF-8")) (error request-result)) 
             (t request-result)))))
  
 (defun parse-request-as (string)
