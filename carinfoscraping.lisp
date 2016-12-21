@@ -2,7 +2,7 @@
 
 (in-package #:carinfoscraping)
 
-;;; "carinfoscraping" goes here. Hacks and glory await!
+;;; "carinfoscraping" goes here. More hacks and glory await!
 
 (defun i ()
   (parse-request-as (http-get "https://www.tinglysning.dk/tinglysning/unsecrest/soegbil?stelnr=WVWZZZ1HZSB012475")))
