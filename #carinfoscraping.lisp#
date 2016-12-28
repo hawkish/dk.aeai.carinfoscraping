@@ -7,11 +7,10 @@
 (defun i ()
   (handler-case
       (progn 
-        (let ((response (parse-request (first-request "https://www.tinglysning.dk/tinglysning/unsecrest/soegbil?stelnr=WVWZZZ1HZSB012475"))))
-          (let ((uuid (get-uuid (parse-request (first response)))))
-            (print uuid))))
-            
-          ;;(second-request (concatenate 'string "https://www.tinglysning.dk/tinglysning/insecrest/bil/uuid/" uuid "?xhtml=true"))))
+        (let ((response (first-request "https://www.tinglysning.dk/tinglysning/unsecrest/soegbil?stelnr=WVWZZZ1HZSB012475")))
+          (let ((uuid (get-uuid (parse-request (first response))))
+                (cookie-jar (last response)))
+            (second-request (concatenate 'string "https://www.tinglysning.dk/tinglysning/insecrest/bil/uuid/" uuid "?xhtml=true") cookie-jar))))
     (on-response-not-ok (ex)
       (format t "An error happened: ~a~%" (text ex)))))
 
