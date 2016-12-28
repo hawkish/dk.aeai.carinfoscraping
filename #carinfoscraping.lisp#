@@ -6,32 +6,58 @@
 
 (defun i ()
   (handler-case
-      (parse-request (http-get-json "https://www.tinglysning.dk/tinglysning/unsecrest/soegbil?stelnr=WVWZZZ1HZSB012475"))
+      (progn 
+        (let ((response (parse-request (first-request "https://www.tinglysning.dk/tinglysning/unsecrest/soegbil?stelnr=WVWZZZ1HZSB012475"))))
+          (let ((uuid (get-uuid (parse-request (first response)))))
+            (print uuid))))
+            
+          ;;(second-request (concatenate 'string "https://www.tinglysning.dk/tinglysning/insecrest/bil/uuid/" uuid "?xhtml=true"))))
     (on-response-not-ok (ex)
       (format t "An error happened: ~a~%" (text ex)))))
 
     
 
-(defun http-get-json (url)
+(defun first-request (url)
   (let ((drakma:*text-content-types* (cons '("application" . "json")
                                            drakma:*text-content-types*))
-	(drakma:*drakma-default-external-format* :utf-8))
-    (multiple-value-bind (request-result status-code headers)
+	(drakma:*drakma-default-external-format* :utf-8)
+        (cookie-jar (make-instance 'drakma:cookie-jar)))
+    (multiple-value-bind (request-result status-code headers cookie-jar)
         (drakma:http-request url
                          :accept "application/json"
                          :content-type "application/json"
                          :method :get
                          :external-format-out :utf-8
                          :external-format-in :utf-8
-                         :redirect 100)
+                         :redirect 100
+                         :cookie-jar cookie-jar)
+      (cond ((not (equalp status-code 200))
+             (error 'on-response-not-ok :text (concatenate 'string "HTTP error: " (write-to-string status-code))))
+            ((not (string= (cdr (assoc ':content-type headers)) "application/json; charset=UTF-8"))
+             (error 'on-response-not-ok :text "Not JSON content.")) 
+            (t (list request-result status-code cookie-jar))))))
+
+(defun second-request (url cookie-jar)
+  (let ((drakma:*text-content-types* (cons '("application" . "json")
+                                           drakma:*text-content-types*))
+	(drakma:*drakma-default-external-format* :utf-8))
+    (multiple-value-bind (request-result status-code headers)
+        (drakma:http-request url
+                         :accept "application/json"
+                         :method :get
+                         :external-format-out :utf-8
+                         :external-format-in :utf-8
+                         :redirect 100
+                         :cookie-jar cookie-jar)
       (cond ((not (equalp status-code 200))
              (error 'on-response-not-ok :text (concatenate 'string "HTTP error: " (write-to-string status-code))))
             ((not (string= (cdr (assoc ':content-type headers)) "application/json; charset=UTF-8"))
              (error 'on-response-not-ok :text "Not JSON content.")) 
             (t request-result)))))
- 
+
+
 (defun parse-request (json-string)
-  (get-uuid (json:decode-json-from-string json-string)))
+  (json:decode-json-from-string json-string))
 
 (defun get-uuid (alist)
   (cdr (assoc :UUID (first (get-items alist)))))
