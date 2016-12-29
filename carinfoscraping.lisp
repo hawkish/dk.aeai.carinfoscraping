@@ -6,18 +6,18 @@
 
 (defparameter *cookie-jar* (make-instance 'drakma:cookie-jar))
 
-(defun i ()
+(defun requests ()
   (handler-case
      
       (let* ((first-response (first-request "https://www.tinglysning.dk/tinglysning/unsecrest/soegbil?stelnr=WVWZZZ1HZSB012475"))
              (uuid (get-uuid (parse-request (first first-response))))
-             (second-response (second-request (concatenate 'string "https://www.tinglysning.dk/tinglysning/unsecrest/bil/uuid/" uuid "?xhtml=true"))))
+             (second-response (second-request (concatenate 'string "https://www.tinglysning.dk/tinglysning/unsecrest/bil/uuid/" uuid "?xhtml=false"))))
         (print second-response))
     (on-response-not-ok (ex)
       (format t "An error happened: ~a~%" (text ex)))))
 
 (defun second-request (url)
-  (let ((drakma:*text-content-types* (cons '("application" . "xhtml+xml")
+  (let ((drakma:*text-content-types* (cons '("application" . "xml")
                                            drakma:*text-content-types*))
 	(drakma:*drakma-default-external-format* :utf-8))
     (multiple-value-bind (request-result status-code)
