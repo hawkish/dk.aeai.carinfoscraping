@@ -8,11 +8,11 @@
 
 (defun requests ()
   (handler-case
-     
       (let* ((first-response (first-request "https://www.tinglysning.dk/tinglysning/unsecrest/soegbil?stelnr=WVWZZZ1HZSB012475"))
-             (uuid (get-uuid (parse-request (first first-response))))
+             (uuid (get-uuid (parse-request first-response)))
              (second-response (second-request (concatenate 'string "https://www.tinglysning.dk/tinglysning/unsecrest/bil/uuid/" uuid "?xhtml=false"))))
-        (print second-response))
+        ;;(print second-response))
+        (cxml:parse second-response (cxml-dom:make-dom-builder)))
     (on-response-not-ok (ex)
       (format t "An error happened: ~a~%" (text ex)))))
 
@@ -23,11 +23,11 @@
     (multiple-value-bind (request-result status-code)
         (drakma:http-request url
                          :accept "application/json"
-                         :method :get
-                         :cookie-jar *cookie-jar*)
+                         :method :get)
+                         ;;:cookie-jar *cookie-jar*)
       (cond ((not (equalp status-code 200))
              (error 'on-response-not-ok :text (concatenate 'string "HTTP error: " (write-to-string status-code))))
-            (t (list request-result status-code))))))
+            (t request-result)))))
     
 (defun first-request (url)
   (let ((drakma:*text-content-types* (cons '("application" . "json")
@@ -37,13 +37,13 @@
         (drakma:http-request url
                          :accept "application/json"
                          :content-type "application/json"
-                         :method :get
-                         :cookie-jar *cookie-jar*)
+                         :method :get)
+                         ;;:cookie-jar *cookie-jar*)
       (cond ((not (equalp status-code 200))
              (error 'on-response-not-ok :text (concatenate 'string "HTTP error: " (write-to-string status-code))))
             ((not (string= (cdr (assoc ':content-type headers)) "application/json; charset=UTF-8"))
              (error 'on-response-not-ok :text "Not JSON content.")) 
-            (t (list request-result status-code))))))
+            (t request-result)))))
 
 (defun parse-request (json-string)
   (json:decode-json-from-source json-string))
