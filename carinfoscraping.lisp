@@ -109,7 +109,11 @@
 
 (defun get-text-value (document tag-name)
   (let* ((node (dom:item (dom:get-elements-by-tag-name document tag-name) 0))
-         (node-child (dom:first-child node)))
+         (node-child
+          (if (dom:element-p node)
+              (dom:first-child node)
+              (values))))
     (if (dom:text-node-p node-child)
         (dom:node-value node-child)
-        ())))
+        (values))))
+
