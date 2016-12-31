@@ -6,14 +6,21 @@
 
 (defparameter *cookie-jar* (make-instance 'drakma:cookie-jar))
 
+(define-condition on-response-not-ok (error)
+  ((text :initarg :text :reader text))) 
+
+(define-condition on-response-not-json (error)
+  ((text :initarg :text :reader text)))
+
+
 (defun requests ()
   (handler-case
-      (let* ((first-response (first-request "https://www.tinglysning.dk/tinglysning/unsecrest/soegbil?stelnr=WVWZZZ1HZSB012475"))
+      (let* ((first-response (first-request "https://www.tinglysning.dk/tinglysning/unsecrest/soegbil?stelnr=VF12RFL1H49621453"))
              (uuid (get-uuid (parse-request first-response)))
              (second-response (second-request (concatenate 'string "https://www.tinglysning.dk/tinglysning/unsecrest/bil/uuid/" uuid "?xhtml=false"))))
+        (print second-response)
+        (parse-xml second-response))
         ;;(print second-response))
-        ;;(cxml:parse second-response (cxml-dom:make-dom-builder)))
-        (cxml:make-source second-response))
     (on-response-not-ok (ex)
       (format t "An error happened: ~a~%" (text ex)))))
 
@@ -55,57 +62,41 @@
 (defun get-items (alist)
   (rest (assoc :ITEMS alist)))
 
-(define-condition on-response-not-ok (error)
-  ((text :initarg :text :reader text))) 
-
-(define-condition on-response-not-json (error)
-  ((text :initarg :text :reader text)))
-
-
-
-(defparameter *source*
-  "<BilSummariskHentResultat xmlns=\"http://rep.oio.dk/tinglysning.dk/service/message/elektroniskakt/1/\" xmlns:ns=\"http://rep.oio.dk/tinglysning.dk/schema/elektroniskakt/1/\" xmlns:ns1=\"http://rep.oio.dk/tinglysning.dk/schema/model/1/\" xmlns:xd=\"http://www.w3.org/2000/09/xmldsig#\">
-  <ns:BilSummarisk>
-    <ns:BilStamoplysninger>
-      <ns1:BilIdentifikator>
-        <ns1:Stelnummer>WVWZZZ1HZSB012475</ns1:Stelnummer>
-      </ns1:BilIdentifikator>
-      <ns1:BilStruktur>
-        <ns1:BilMaerke>
-          <ns1:BilFabrikatTekst>VOLKSWAGEN</ns1:BilFabrikatTekst>
-          <ns1:BilModelTekst>GOLF</ns1:BilModelTekst>
-          <ns1:BilVariantTekst>1,8</ns1:BilVariantTekst>
-        </ns1:BilMaerke>
-        <ns1:RegistreringsnummerTekst>EF41859</ns1:RegistreringsnummerTekst>
-        <ns1:FoersteRegistreringsAar>1994</ns1:FoersteRegistreringsAar>
-      </ns1:BilStruktur>
-    </ns:BilStamoplysninger>
-    <ns1:ModelId>1174088768</ns1:ModelId>
-  </ns:BilSummarisk>
-  <ns:UdskriftDatoTid>2016-12-30T11:40:18.951+01:00</ns:UdskriftDatoTid>
-  <ns:AnmeldelseModtagetIndikator>false</ns:AnmeldelseModtagetIndikator>
-  <xd:Signature>
-    <xd:SignedInfo>
-      <xd:CanonicalizationMethod Algorithm=\"\"/>
-      <xd:SignatureMethod Algorithm=\"\"/>
-      <xd:Reference>
-        <xd:DigestMethod Algorithm=\"\"/>
-        <xd:DigestValue/>
-      </xd:Reference>
-    </xd:SignedInfo>
-    <xd:SignatureValue/>
-  </xd:Signature>
-</BilSummariskHentResultat>")
-
 (defun parse-xml (source)
   (let* ((document (cxml:parse source (cxml-dom:make-dom-builder)))
+         (tinglysningsdato (get-text-value document "ns1:TinglysningsDato"))
+         (prioritetnummer (get-text-value document"ns1:PrioritetNummer"))
+         (haeftelsetype (get-text-value document "ns:HaeftelseType"))
+         (legalunitname (get-text-value document "ns2:LegalUnitName"))
+         (cvrnumberidentifier (get-text-value document "ns2:CVRnumberIdentifier"))
+         (personname (get-text-value document "ns7:PersonName"))
+         (birthdate (get-text-value document "ns8:BirthDate"))
+         (beloebvaerdi (get-text-value document "ns1:BeloebVaerdi"))
+         (valutakode (get-text-value document "ns1:ValutaKode"))
+         (haeftelserentepaalydendesats (get-text-value document "ns1:HaeftelseRentePaalydendeSats"))
          (stelnummer (get-text-value document "ns1:Stelnummer"))
          (bilfabrikant (get-text-value document "ns1:BilFabrikatTekst"))
          (bilmodel (get-text-value document "ns1:BilModelTekst"))
          (bilvariant (get-text-value document "ns1:BilVariantTekst"))
          (registreringsnummer (get-text-value document "ns1:RegistreringsnummerTekst"))
          (foersteregistreringsaar (get-text-value document "ns1:FoersteRegistreringsAar")))
-    (list stelnummer bilfabrikant bilmodel bilvariant registreringsnummer foersteregistreringsaar)))
+    (list
+     (cons "tinglysningsdato" tinglysningsdato)
+     (cons "prioritetnummer" prioritetnummer)
+     (cons "haeftelsetype" haeftelsetype)
+     (cons "legalunitname" legalunitname)
+     (cons "cvrnumberidentifier" cvrnumberidentifier)
+     (cons "personname" personname)
+     (cons "birthdate" birthdate)
+     (cons "beloebvaerdi" beloebvaerdi)
+     (cons "valutakode" valutakode)
+     (cons "haeftelserentepaalydendesats" haeftelserentepaalydendesats)
+     (cons "stelnummer" stelnummer)
+     (cons "bilfabrikant" bilfabrikant)
+     (cons "bilmodel" bilmodel)
+     (cons "bilvariant" bilvariant)
+     (cons "registreringsnummer" registreringsnummer)
+     (cons "foersteregistreringsaar" foersteregistreringsaar))))
 
 (defun get-text-value (document tag-name)
   (let* ((node (dom:item (dom:get-elements-by-tag-name document tag-name) 0))
