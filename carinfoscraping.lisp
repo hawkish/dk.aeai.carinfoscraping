@@ -68,45 +68,26 @@
 (defun read-xml (source)
   (let* ((document (parse-xml source)))
     (list
-     (cons "tinglysningsdato" (get-text-value document "ns1:TinglysningsDato"))
-     (cons "prioritetnummer" (get-text-value document"ns1:PrioritetNummer"))
-     (cons "haeftelsetype" (get-text-value document "ns:HaeftelseType"))
-     (cons "legalunitname" (get-text-value document "ns2:LegalUnitName"))
-     (cons "cvrnumberidentifier" (get-text-value document "ns2:CVRnumberIdentifier"))
-     (cons "personname" (get-text-value document "ns7:PersonName"))
-     (cons "birthdate" (get-text-value document "ns8:BirthDate"))
-     (cons "beloebvaerdi" (get-text-value document "ns1:BeloebVaerdi"))
-     (cons "valutakode" (get-text-value document "ns1:ValutaKode"))
-     (cons "haeftelserentepaalydendesats" (get-text-value document "ns1:HaeftelseRentePaalydendeSats"))
-     (cons "stelnummer" (get-text-value document "ns1:Stelnummer"))
-     (cons "bilfabrikant" (get-text-value document "ns1:BilFabrikatTekst"))
-     (cons "bilmodel" (get-text-value document "ns1:BilModelTekst"))
-     (cons "bilvariant" (get-text-value document "ns1:BilVariantTekst"))
-     (cons "registreringsnummer" (get-text-value document "ns1:RegistreringsnummerTekst"))
-     (cons "foersteregistreringsaar" (get-text-value document "ns1:FoersteRegistreringsAar")))))
+     (cons "tinglysningsdato" (get-text-element-by-tag document "ns1:TinglysningsDato"))
+     (cons "prioritetnummer" (get-text-element-by-tag document"ns1:PrioritetNummer"))
+     (cons "haeftelsetype" (get-text-element-by-tag document "ns:HaeftelseType"))
+     (cons "legalunitname" (get-text-element-by-tag document "ns2:LegalUnitName"))
+     (cons "cvrnumberidentifier" (get-text-element-by-tag document "ns2:CVRnumberIdentifier"))
+     (cons "personname" (get-text-element-by-tag document "ns7:PersonName"))
+     (cons "birthdate" (get-text-element-by-tag document "ns8:BirthDate"))
+     (cons "beloebvaerdi" (get-text-element-by-tag document "ns1:BeloebVaerdi"))
+     (cons "valutakode" (get-text-element-by-tag document "ns1:ValutaKode"))
+     (cons "haeftelserentepaalydendesats" (get-text-element-by-tag document "ns1:HaeftelseRentePaalydendeSats"))
+     (cons "tillaegstekstsamling" (concatenate-text-sections document))
+     (cons "stelnummer" (get-text-element-by-tag document "ns1:Stelnummer"))
+     (cons "bilfabrikant" (get-text-element-by-tag document "ns1:BilFabrikatTekst"))
+     (cons "bilmodel" (get-text-element-by-tag document "ns1:BilModelTekst"))
+     (cons "bilvariant" (get-text-element-by-tag document "ns1:BilVariantTekst"))
+     (cons "registreringsnummer" (get-text-element-by-tag document "ns1:RegistreringsnummerTekst"))
+     (cons "foersteregistreringsaar" (get-text-element-by-tag document "ns1:FoersteRegistreringsAar")))))
 
-(defparameter *source*
-  "<TillaegstekstSamling>
-          <TekstAngivelse>
-            <TekstGruppe>
-              <Afsnit>Advarsel: Køretøjet i anmeldelsen kan være pantsat efter de før 1/6 1993 gældende regler.</Afsnit>
-            </TekstGruppe>
-          </TekstAngivelse>
-          <TekstAngivelse>
-            <TekstGruppe>
-              <Afsnit>Advarsel: Ejeren: 101076XXXX i Motorregisteret af bilen med stelnr: VF12RFL1H49621453 findes ikke blandt debitorerne i anmeldelsen. Kontroller stelnr</Afsnit>
-            </TekstGruppe>
-          </TekstAngivelse>
-          <TekstAngivelse>
-            <TekstGruppe>
-              <Afsnit>Advarsel: Ejeren: 100976XXXX i Motorregisteret af bilen med stelnr: VF12RFL1H49621453 findes ikke blandt debitorerne i anmeldelsen. Kontroller stelnr</Afsnit>
-            </TekstGruppe>
-          </TekstAngivelse>
- </TillaegstekstSamling>")
-
-(defun get-text-value (document tag-name)
-  (let* ((node (dom:item (dom:get-elements-by-tag-name document tag-name) 0))
-         (node-child
+(defun get-text-element (node)
+  (let* ((node-child
           (if (dom:element-p node)
               (dom:first-child node)
               (values))))
@@ -114,3 +95,16 @@
         (dom:node-value node-child)
         (values))))
 
+(defun concatenate-text-sections (document)
+  (let* ((nodelist (dom:get-elements-by-tag-name document "ns1:Afsnit"))
+         (result '()))
+    (dom:do-node-list (node nodelist)
+      (push (get-text-element node) result))
+    (format nil "~{~a~^. ~}" result)))
+
+(defun get-text-element-by-tag (document tag-name)
+    (get-text-element (dom:item (dom:get-elements-by-tag-name document tag-name) 0)))
+
+(defmacro concatenatef (s &rest strs) 
+  "Append additional strings to the first string in-place."
+  `(setf ,s (concatenate 'string ,s ,@strs)))
