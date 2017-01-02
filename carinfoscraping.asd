@@ -6,6 +6,7 @@
   :license "Specify license here"
   :depends-on (#:drakma
                #:cxml
+               #:yason
                #:cl-json)
   :serial t
   :components ((:file "package")

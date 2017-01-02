@@ -53,14 +53,20 @@
              (error 'on-response-not-ok :text "Not JSON content.")) 
             (t request-result)))))
 
+(defun maybe-convert-to-keyword (js-name)
+  (or (find-symbol (string-upcase js-name) :keyword)
+      js-name))
+
 (defun parse-request (json-string)
-  (json:decode-json-from-source json-string))
+  (let* ((yason:*parse-object-as* :alist)
+         (yason:*parse-object-key-fn* #'maybe-convert-to-keyword))
+    (yason:parse json-string)))
 
 (defun get-uuid (alist)
   (cdr (assoc :UUID (first (get-items alist)))))
 
 (defun get-items (alist)
-  (rest (assoc :ITEMS alist)))
+  (rest (assoc :items alist)))
 
 (defun parse-xml(source)
   (cxml:parse source (cxml-dom:make-dom-builder)))
