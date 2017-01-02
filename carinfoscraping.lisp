@@ -18,7 +18,7 @@
       (let* ((first-response (first-request "https://www.tinglysning.dk/tinglysning/unsecrest/soegbil?stelnr=VF12RFL1H49621453"))
              (uuid (get-uuid (parse-request first-response)))
              (second-response (second-request (concatenate 'string "https://www.tinglysning.dk/tinglysning/unsecrest/bil/uuid/" uuid "?xhtml=false"))))
-        ;;(print second-response)
+        
         (yason:encode-alist (read-xml second-response)))
     (on-response-not-ok (ex)
       (format t "An error happened: ~a~%" (text ex)))))
