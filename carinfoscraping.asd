@@ -7,7 +7,8 @@
   :depends-on (#:drakma
                #:cxml
                #:yason
-               #:cl-json)
+               #:plump
+               #:clss)
   :serial t
   :components ((:file "package")
                (:file "carinfoscraping")))
