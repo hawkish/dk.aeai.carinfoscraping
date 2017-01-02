@@ -105,6 +105,3 @@
 (defun get-text-element-by-tag (document tag-name)
     (get-text-element (dom:item (dom:get-elements-by-tag-name document tag-name) 0)))
 
-(defmacro concatenatef (s &rest strs) 
-  "Append additional strings to the first string in-place."
-  `(setf ,s (concatenate 'string ,s ,@strs)))
