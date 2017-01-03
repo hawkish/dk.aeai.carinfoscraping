@@ -11,5 +11,7 @@
                #:clss)
   :serial t
   :components ((:file "package")
+               (:file "tinglysningen")
+               (:file "trafikstyrelsen")
                (:file "carinfoscraping")))
 
