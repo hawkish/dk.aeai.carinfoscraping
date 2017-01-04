@@ -8,7 +8,9 @@
                #:cxml
                #:yason
                #:plump
-               #:clss)
+               #:clss
+               #:cl-utilities
+               #:cl-ppcre)
   :serial t
   :components ((:file "package")
                (:file "tinglysningen")
