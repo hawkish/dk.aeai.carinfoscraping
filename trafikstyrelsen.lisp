@@ -7,7 +7,7 @@
 (defun request-trafikstyrelsen ()
   (handler-case
       (let* ((response (trafikstyrelsen-request "http://selvbetjening.trafikstyrelsen.dk/Sider/resultater.aspx?Reg=AF12345"))
-             (link (first (get-surveyor-links (parse-response response))))
+             (link (first (get-surveyor-links (parse-html response))))
              (response (trafikstyrelsen-request (concatenate 'string "http://selvbetjening.trafikstyrelsen.dk" link))))
              
         (print response)
@@ -37,7 +37,7 @@
             (serialize-to-string
              (get-onclick dom))))))
 
-(defun parse-response (source)
+(defun parse-html (source)
   "Parse a string into a Plump DOM."
   (plump:parse source))
 
@@ -62,3 +62,41 @@
   (let* ((result (cl-ppcre:regex-replace "location.href=&quot;" string ""))
         (result (cl-ppcre:regex-replace "&quot;" result "")))
     (cl-ppcre:regex-replace "&amp;" result "&")))
+
+(defparameter *html*
+  "<div class=\"floatLeft grid6\">
+    <h2>Køretøj</h2>
+	<div class=\"pairName\">Mærke</div>
+	<div class=\"pairValue\">YAMAHA</div>
+	<div class=\"pairName\">Model</div>
+	<div class=\"pairValue\">XJ</div>
+	<div class=\"pairName\">Køretøjsart</div>
+	<div class=\"pairValue\">Motorcykel</div>
+    <div class=\"pairName\">Reg.nr.</div>
+	<div class=\"pairValue\">EZ12647</div>
+	<div class=\"pairName\">Stelnr.</div>
+	<div class=\"pairValue\">11M007467</div>
+	<div class=\"pairName\">Køretøjs-ID</div>
+	<div class=\"pairValue\">4016507198411177</div>
+	<div class=\"clear\"></div>
+	<br /><br />
+</div>
+<div class=\"floatLeft grid6\">
+	<h2>Synsdetaljer</h2><div class=\"pairName\">Synsart</div>
+	<div class=\"pairValue\">Registreringssyn</div>
+	<div class=\"pairName\">Synstype</div>
+	<div class=\"pairValue\">Første syn</div>
+	<div class=\"pairName\">Synsdato</div>
+	<div class=\"pairValue\">12-05-2010</div>
+    <div class=\"pairName\">Sluttid</div>
+	<div class=\"pairValue\">09:37</div>
+	<div class=\"pairName\">Km-stand</div>
+	<div class=\"pairValue\">65.000</div>
+	<div class=\"pairName\">Synsresultat</div>
+	<div class=\"pairValue\">Godkendt</div>
+	<div class=\"pairName\">Sidste frist for omsyn/genfremstilling</div>
+	<div class=\"pairValue\"></div>
+	<div class=\"clear\"></div>
+	<br />")
+
+;;  (clss:select "div[class=pairValue]" (PARSE-HTML *html*)))
