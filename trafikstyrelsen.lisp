@@ -70,22 +70,34 @@
                     </table>")
 
 (defun get-surveyor-links (source)
-  (filter-link (split-at-quote (serialize-to-string (get-onclick (parse-first-trafikstyrelsen-response source))))))
+  (mapcar #'remove-extra-tags
+          (remove-if (complement #'(lambda (x) (is-match "location.href" x)))
+           (split-at-quote
+            (serialize-to-string
+             (get-onclick
+              (parse-first-trafikstyrelsen-response source)))))))
 
 (defun parse-first-trafikstyrelsen-response (source)
+  "Parse a string into a Plump DOM."
   (plump:parse source))
 
 (defun get-onclick (dom)
+  "Returns Plump DOMs with TRs containing both a class and an onclick attribute."
   (clss:select "tr[class][onclick]" dom))
 
 (defun serialize-to-string (dom)
+  "Returns a string serialized from a Plump DOM"
   (plump:serialize dom nil))
 
 (defun split-at-quote (string)
-  (split-sequence:split-sequence #\" string))
+  "Returns a list of strings from a string split at all quotes."
+  (cl-utilities:split-sequence #\" string))
 
 (defun is-match (substring string)
+  "Returns true if the substring is any part of the string."
   (not (not (search substring string))))
 
-(defun filter-link (list)
-  (remove-if (complement #'(lambda (x) (is-match "location.href" x))) list))
+(defun remove-extra-tags (string)
+  "Removes two substrings from a string."
+  (let ((result (cl-ppcre:regex-replace "location.href=&quot;/Sider" string "")))
+    (cl-ppcre:regex-replace "&quot;" result "")))
