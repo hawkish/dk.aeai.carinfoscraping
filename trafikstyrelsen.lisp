@@ -6,15 +6,17 @@
 
 (defun request-trafikstyrelsen ()
   (handler-case
-      (let* ((response (first-trafikstyrelsen-request "http://selvbetjening.trafikstyrelsen.dk/Sider/resultater.aspx?Reg=AF12345")))
+      (let* ((response (trafikstyrelsen-request "http://selvbetjening.trafikstyrelsen.dk/Sider/resultater.aspx?Reg=AF12345"))
+             (link (first (get-surveyor-links (parse-response response))))
+             (response (trafikstyrelsen-request (concatenate 'string "http://selvbetjening.trafikstyrelsen.dk" link))))
              
-        
-        (print response))
+        (print response)
+        (print link))
     (on-response-not-ok (ex)
       (format t "An error happened: ~a~%" (text ex)))))
 
 
-(defun first-trafikstyrelsen-request (url)
+(defun trafikstyrelsen-request (url)
   (let ((drakma:*text-content-types* (cons '("text" . "html")
                                            drakma:*text-content-types*))
 	(drakma:*drakma-default-external-format* :utf-8))
@@ -69,15 +71,14 @@
                         </tbody>
                     </table>")
 
-(defun get-surveyor-links (source)
-  (mapcar #'remove-extra-tags
+(defun get-surveyor-links (dom)
+  (mapcar #'replace-extra-tags
           (remove-if (complement #'(lambda (x) (is-match "location.href" x)))
            (split-at-quote
             (serialize-to-string
-             (get-onclick
-              (parse-first-trafikstyrelsen-response source)))))))
+             (get-onclick dom))))))
 
-(defun parse-first-trafikstyrelsen-response (source)
+(defun parse-response (source)
   "Parse a string into a Plump DOM."
   (plump:parse source))
 
@@ -97,7 +98,8 @@
   "Returns true if the substring is any part of the string."
   (not (not (search substring string))))
 
-(defun remove-extra-tags (string)
-  "Removes two substrings from a string."
-  (let ((result (cl-ppcre:regex-replace "location.href=&quot;/Sider" string "")))
-    (cl-ppcre:regex-replace "&quot;" result "")))
+(defun replace-extra-tags (string)
+  "Replaces three substrings in a string."
+  (let* ((result (cl-ppcre:regex-replace "location.href=&quot;" string ""))
+        (result (cl-ppcre:regex-replace "&quot;" result "")))
+    (cl-ppcre:regex-replace "&amp;" result "&")))
