@@ -68,9 +68,11 @@
   (clss:select (concatenate 'string "div[class=" name "]") dom))
 
 (defun get-pairvalues (name dom)
-  (let* ((elements (clss:select (concatenate 'string "div[class=" name "]") dom)))
-    (loop for child across (children node)
-       do (print child))))
+  (let* ((elements (clss:select (concatenate 'string "div[class=" name "]") dom))
+         (result '()))
+    (loop for element across elements
+       do (push (plump:text (plump:first-child element)) result))
+    result))
    
     
     
