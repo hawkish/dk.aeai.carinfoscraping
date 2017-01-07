@@ -1,6 +1,6 @@
 ;;;; trafikstyrelsen.lisp
 
-(in-package #:carinfoscraping)
+(in-package #:dk.aeai.carinfoscraping)
 
 ;;; "trafikstyrelsen" goes here. More hacks and glory await!
 
@@ -62,6 +62,15 @@
   (let* ((result (cl-ppcre:regex-replace "location.href=&quot;" string ""))
         (result (cl-ppcre:regex-replace "&quot;" result "")))
     (cl-ppcre:regex-replace "&amp;" result "&")))
+
+(defun get-class (name dom)
+  (clss:select (concatenate 'string "div[class=" name "]") dom))
+
+(defun get-pairvalues (name dom)
+  (let* ((elements (clss:select (concatenate 'string "div[class=" name "]") dom)))
+    (iterate (iterate:for plump-dom:element iterate:in elements)
+             (plump:text element))))
+                  
 
 (defparameter *html*
   "<div class=\"floatLeft grid6\">

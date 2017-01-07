@@ -1,5 +1,6 @@
 ;;;; package.lisp
 
-(defpackage #:carinfoscraping
-  (:use #:cl))
+(defpackage #:dk.aeai.carinfoscraping
+  (:use #:cl)
+  (:shadowing-import-from #:iterate))
 

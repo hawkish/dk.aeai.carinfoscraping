@@ -1,6 +1,6 @@
 ;;;; carinfoscraping.lisp
 
-(in-package #:carinfoscraping)
+(in-package #:dk.aeai.carinfoscraping)
 
 ;;; "carinfoscraping" goes here. More hacks and glory await!
 

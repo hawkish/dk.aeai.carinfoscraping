@@ -1,6 +1,6 @@
 ;;;; tinglysningen.lisp
 
-(in-package #:carinfoscraping)
+(in-package #:dk.aeai.carinfoscraping)
 
 ;;; "tinglysningen" goes here. More hacks and glory await!
 
