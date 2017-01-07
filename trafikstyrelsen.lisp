@@ -2,6 +2,7 @@
 
 (in-package #:dk.aeai.carinfoscraping)
 
+
 ;;; "trafikstyrelsen" goes here. More hacks and glory await!
 
 (defun request-trafikstyrelsen ()
@@ -68,8 +69,12 @@
 
 (defun get-pairvalues (name dom)
   (let* ((elements (clss:select (concatenate 'string "div[class=" name "]") dom)))
-    (iterate (iterate:for plump-dom:element iterate:in elements)
-             (plump:text element))))
+    (loop for child across (children node)
+       do (print child))))
+   
+    
+    
+
                   
 
 (defparameter *html*
