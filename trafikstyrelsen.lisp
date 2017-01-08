@@ -11,8 +11,7 @@
              (link (first (get-surveyor-links (parse-html response))))
              (response (trafikstyrelsen-request (concatenate 'string "http://selvbetjening.trafikstyrelsen.dk" link))))
              
-        (print response)
-        (print link))
+        (get-pairs (parse-html response)))
     (on-response-not-ok (ex)
       (format t "An error happened: ~a~%" (text ex)))))
 
