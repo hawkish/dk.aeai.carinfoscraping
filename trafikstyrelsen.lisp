@@ -75,17 +75,19 @@
     
 (defun get-texts (name dom)
   (let* ((elements (clss:select (concatenate 'string "div[class=" name "]") dom)))
-    (map 'list (lambda (element) (get-text element)) elements)))
+    (map 'list (lambda (element) (get-children element)) elements)))
 
-(defun get-text (element)
-  (let* ((child-node (plump:first-child element))) 
-    (when (plump:text-node-p child-node)
-      (plump:text child-node))))
-
-
+(defun get-children (element)
+  (let* ((children (plump:children element)))
+    (map 'list (lambda (child) (get-text child)) children)))
+         
+(defun get-text (child)
+  (when (plump:text-node-p child)
+    (plump:text child)))
     
 
-                  
+(defparameter *html2*
+  "<div class=\"pairValue\">Vonsildvej 23<br/>6000 Kolding</div>")                  
 
 (defparameter *html*
   "<div class=\"floatLeft grid6\">
