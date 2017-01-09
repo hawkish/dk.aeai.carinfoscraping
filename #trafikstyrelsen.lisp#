@@ -132,6 +132,27 @@
 	<div class=\"pairName\">Sidste frist for omsyn/genfremstilling</div>
 	<div class=\"pairValue\"></div>
 	<div class=\"clear\"></div>
-	<br />")
+	<br />
+
+<div class=\"floatRight grid6\">
+	<div><h2>Fejloversigt<span class=\"floatRightNoClear infoText hideOnSmall\"></span><span class=\"floatRightNoClear infoText hideOnLarge hideOnMedium\"></span></h2></div>
+	<div class=\"clear\"></div>
+    <div class=\"errorList\">
+        Der blev ikke registreret nogen fejl.
+         <div class=\"number\" title='El-anlæg, lygter, reflekser mv.'>6</div>
+	            <div class=\"information\
+\">baglygte defekt, venstre</div>
+            
+    </div>
+</div>
+
+<div class=\"clear\"></div>
+<br />
+
+<div class=\"floatLeft\">
+    <h2>Servicebemærkninger</h2>
+    
+    
+</div>")
 
 ;;  (clss:select "div[class=pairValue]" (PARSE-HTML *html*)))
