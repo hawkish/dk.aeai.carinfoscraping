@@ -78,13 +78,21 @@
     (map 'list (lambda (element) (get-children element)) elements)))
 
 (defun get-children (element)
-  (let* ((children (plump:children element)))
-    (map 'list (lambda (child) (get-text child)) children)))
+  (let* ((elements (plump:children element)))
+    (concatenate-strings (map 'list (lambda (element) (get-text element)) elements))))
          
-(defun get-text (child)
-  (when (plump:text-node-p child)
-    (plump:text child)))
-    
+(defun get-text (element)
+  (if (plump:text-node-p element)
+      (plump:text element)
+      (string " ")))
+
+(defun concatenate-strings (sequence)
+  (reduce #'(lambda (current next)
+              (if (stringp next)
+                  (concatenate 'string current next)
+                  current))
+          sequence
+          :initial-value ""))
 
 (defparameter *html2*
   "<div class=\"pairValue\">Vonsildvej 23<br/>6000 Kolding</div>")                  
