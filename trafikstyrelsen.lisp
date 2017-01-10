@@ -92,7 +92,7 @@
                   (concatenate 'string current next)
                   current))
           sequence
-          :initial-value ""))
+          :initial-value NIL))
 
 (defparameter *html2*
   "<div class=\"pairValue\">Vonsildvej 23<br/>6000 Kolding</div>")                  
